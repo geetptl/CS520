@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[94]:
+# In[ ]:
 
 
 import numpy as np
@@ -15,7 +15,7 @@ import time
 import pandas as pd
 
 
-# In[95]:
+# In[ ]:
 
 
 # Constants
@@ -57,7 +57,7 @@ OUTPUT_BASE_PATH = "Outputs/"
 TODAY = date.today()
 
 
-# In[96]:
+# In[ ]:
 
 
 # Implementation of MinHeap to use it as
@@ -107,6 +107,16 @@ class MinHeap:
         self.heapifyDownwards(0)
         return k
 
+    def updateByValue(self, k):
+        for i in range(len(self.elements)):
+            if self.elements[i][1]==k[1]:
+                if self.elements[i][0] > k[0]:
+                    del self.elements[i]
+                    self.size-=1
+                    self.insert(k)
+                return
+        self.insert(k)
+
 # Custom class to use as the key for Priority queue,
 # such that it takes two values, and a pair of weights
 # to compare each other's priority.
@@ -133,7 +143,7 @@ class EvaluationPair:
         return self.weight[0]*self.h + self.weight[1]*self.g <= self.weight[0]*other.h + self.weight[1]*other.g
 
 
-# In[97]:
+# In[ ]:
 
 
 def calculateAllNeighbours(location, t_size):
@@ -143,7 +153,7 @@ def calculateAllNeighbours(location, t_size):
     return list(filter(lambda x: abs(location[0]-x[0])+abs(location[1]-x[1])==1, [(x,y) for x in range(location[0]-1 if location[0]-1 > -1 else 0, location[0]+2 if location[0]+1<t_size else t_size) for y in range(location[1]-1 if location[1]-1 > -1 else 0, location[1]+2 if location[1]+1<t_size else t_size)]))
 
 
-# In[98]:
+# In[ ]:
 
 
 def getRandomCoordinates(t_size):
@@ -158,7 +168,7 @@ def getRandomCoordinatesInQuarter(t, quarter):
     return (random.randint(x[0], x[1]), random.randint(y[0], y[1]))
 
 
-# In[99]:
+# In[ ]:
 
 
 def generateEnvironment(t):
@@ -190,7 +200,7 @@ def generateEnvironment(t):
     return grid, start, reach
 
 
-# In[100]:
+# In[ ]:
 
 
 def showGrid(grid, name, format_='png'):
@@ -207,7 +217,7 @@ def showGrid(grid, name, format_='png'):
     plt.savefig(OUTPUT_BASE_PATH + TODAY.strftime("%d-%m-%Y") + "-" + name + "." + format_, bbox_inches="tight", format=format_)
 
 
-# In[101]:
+# In[ ]:
 
 
 def initAgentKnowlegde(grid, start, reach):
@@ -217,7 +227,7 @@ def initAgentKnowlegde(grid, start, reach):
     return agentKnowledge
 
 
-# In[102]:
+# In[ ]:
 
 
 def manhattanDistance(pos1, pos2):
@@ -225,7 +235,7 @@ def manhattanDistance(pos1, pos2):
     return abs(pos2[1] - pos1[1]) + abs(pos2[0] - pos1[0])
 
 
-# In[103]:
+# In[ ]:
 
 
 def tracePath(agentKnowledge, parentMatrix, current, start):
@@ -306,7 +316,7 @@ def AStar_(environment, start, reach, t, stopAtDeadend, tiebreakWeight, isAdapti
                     hueristic[i] = manhattanDistance(i,reach)           
                 elif isAdaptive and hueristicAdaptive[i] == 0:
                     hueristic[i] = manhattanDistance(i,reach)
-                openList.insert((EvaluationPair(hueristic[i],gcost[i], tiebreakWeight), i, current))
+                openList.updateByValue((EvaluationPair(hueristic[i],gcost[i], tiebreakWeight), i, current))
     path = tracePath(agentKnowledge, parentMatrix, current, start)
     agentKnowledge[start] = START
     agentKnowledge[reach] = END
@@ -323,7 +333,7 @@ def AStar_(environment, start, reach, t, stopAtDeadend, tiebreakWeight, isAdapti
     }
 
 
-# In[104]:
+# In[ ]:
 
 
 # Trace back on the current path, and find neighbours
@@ -375,7 +385,7 @@ def repBckAStar_(environment, start, reach, t, tiebreakWeight):
     return repFwdAStar_(environment, reach, start, t, tiebreakWeight)
 
 
-# In[105]:
+# In[ ]:
 
 
 def AdaptiveAStar(environment,start,reach,t):
@@ -412,99 +422,7 @@ def AdaptiveAStar(environment,start,reach,t):
     }
 
 
-# In[115]:
-
-
-environment, start, reach = generateEnvironment(TEST_WORLD_SIZE)
-showGrid(environment, "base_environment", format_='png')
-
-
-# In[116]:
-
-
-astar = AStar_(environment, start, reach, t=TEST_WORLD_SIZE, stopAtDeadend=False, tiebreakWeight=(1,1), isAdaptive=False)
-
-
-# In[117]:
-
-
-print(astar["success"])
-print(len(astar["closedList"]))
-showGrid(astar["agentKnowledge"], "final_state", format_='png')
-
-
-# In[118]:
-
-
-adaptive = AdaptiveAStar(environment, start, reach, TEST_WORLD_SIZE)
-
-
-# In[119]:
-
-
-print(adaptive["ans"]["success"])
-print(adaptive["nodesExplored"])
-print(adaptive["count"])
-
-
 # In[ ]:
-
-
-# %matplotlib widget
-
-# #https://stackoverflow.com/questions/55401246/pyplot-imshow-3d-array-with-a-slider
-
-# visual = astar["visuals"]
-# visual.append(astar["agentKnowledge"])
-
-# idx0 = 0
-# plt.clf()
-# plt.xticks([])
-# plt.yticks([])
-# l = plt.imshow(X = [[COLORMAP[e] for e in row] for row in visual[idx0]])
-
-# axidx = plt.axes([0.1, 0.25, 0.0225, 0.63])
-# slidx = Slider(axidx, 'Step Number', 0, len(visual)-1, valinit=idx0, valfmt='%d', orientation='vertical')
-
-# def update(val):
-#     idx = slidx.val
-#     l.set_data([[COLORMAP[e] for e in row] for row in visual[int(idx)]])
-# slidx.on_changed(update)
-
-# plt.show()
-
-
-# In[120]:
-
-
-repFwdAns = repFwdAStar_(environment, start, reach, t=TEST_WORLD_SIZE, tiebreakWeight=(1,1))
-
-
-# In[121]:
-
-
-repFwdPath = repFwdAns["totalPath"]
-
-print(repFwdAns["ans"]["status"])
-print(repFwdAns["nodesExplored"])
-
-
-# In[122]:
-
-
-repBckAns = repBckAStar_(environment, start, reach, t=TEST_WORLD_SIZE, tiebreakWeight=(1,1))
-
-
-# In[123]:
-
-
-repBckPath = repBckAns["totalPath"]
-
-print(repBckAns["ans"]["status"])
-print(repBckAns["nodesExplored"])
-
-
-# In[125]:
 
 
 data = []
@@ -577,11 +495,9 @@ for i in range(1, TEST_RUNS+1):
 # In[ ]:
 
 
-pd.set_option('display.float_format','{:.2f}'.format)
 df = pd.DataFrame(data)
 df.to_csv("Outputs/101x101_data-raw.csv")
 df.describe().to_csv("Outputs/101x101_data-description.csv")
-# df.describe()
 
 
 # In[ ]:
