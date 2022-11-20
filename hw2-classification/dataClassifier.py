@@ -70,9 +70,13 @@ def enhancedFeatureExtractorDigit(datum):
 
     ##
     """
-    features = basicFeatureExtractorDigit(datum)
+    features = util.Counter()
 
-    "*** YOUR CODE HERE ***"
+    for i, j in [(i, j) for i in range(0, DIGIT_DATUM_WIDTH, DIGIT_DATUM_WIDTH // 7) for j in
+                 range(0, DIGIT_DATUM_HEIGHT, DIGIT_DATUM_HEIGHT // 7)]:
+        f = sum([datum.getPixel(u, v) for u in range(i, i + 4) for v in range(j, j + 4)])
+        print((i, j), ":", f)
+        features[(i//4, j//4)] = sum([datum.getPixel(u, v) for u in range(i, i + 4) for v in range(j, j + 4)])
 
     return features
 
