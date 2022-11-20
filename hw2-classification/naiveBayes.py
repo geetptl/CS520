@@ -5,9 +5,23 @@
 # purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
 # John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+import math
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 import classificationMethod
 import util
+
+
+def showDatum(data, filename):
+    viewer = np.zeros(shape=(max([u for u, _ in data.keys()]) + 1, max([u for _, u in data.keys()]) + 1))
+    for feature, value in data.items():
+        viewer[feature] = value
+    viewer = viewer / np.max(viewer)
+    viewer = np.pad(np.rot90(np.fliplr(np.kron(viewer, np.ones((20, 20))))), ((1, 1), (1, 1)), 'constant',
+                    constant_values=1)
+    plt.imsave(filename, viewer, cmap='gray', vmin=0, vmax=1)
 
 
 class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
@@ -19,6 +33,10 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     """
 
     def __init__(self, legalLabels):
+        self.features = None
+        self.posteriors = None
+        self.conditionals = None
+        self.priors = None
         self.legalLabels = legalLabels
         self.type = "naivebayes"
         self.k = 1  # this is the smoothing parameter, ** use it in your train method **
@@ -38,7 +56,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
 
         # might be useful in your code later...
         # this is a list of all features in the training set.
-        self.features = list(set([f for datum in trainingData for f in list(datum.keys())]));
+        self.features = list(set([f for datum in trainingData for f in list(datum.keys())]))
 
         if (self.automaticTuning):
             kgrid = [0.001, 0.01, 0.05, 0.1, 0.5, 1, 5, 10, 20, 50]
@@ -60,9 +78,35 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         To get the list of all possible features or labels, use self.features and
         self.legalLabels.
         """
+        priors = util.Counter()
+        for p in trainingLabels:
+            priors.incrementAll([p], 1)
+        priors.normalize()
+        self.priors = priors
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        bestAccuracy = -math.inf
+        bestConditionals = None
+        for k_ in kgrid:
+            print("k :", k_)
+            conditionals_ = util.Counter()
+            for data, label in zip(trainingData, trainingLabels):
+                labelConditional = util.Counter()
+                for feature, value in data.items():
+                    labelConditional.incrementAll([feature], value + k_)
+                labelConditional.normalize()
+                conditionals_[label] = labelConditional
+            self.conditionals = conditionals_
+            for label, data in conditionals_.items():
+                showDatum(data, "out/training/k_{}_label_{}.png".format(k_, label))
+            guesses = self.classify(validationData)
+            correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+            accuracy = correct * 100 / len(validationLabels)
+            print("Accuracy :", accuracy)
+            if accuracy > bestAccuracy:
+                self.k = k_
+                bestConditionals = conditionals_
+        self.conditionals = bestConditionals
+        print("Best k :", self.k)
 
     def classify(self, testData):
         """
@@ -74,7 +118,8 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         self.posteriors = []  # Log posteriors are stored for later data analysis (autograder).
         for datum in testData:
             posterior = self.calculateLogJointProbabilities(datum)
-            guesses.append(posterior.argMax())
+            label = posterior.argMax()
+            guesses.append(label)
             self.posteriors.append(posterior)
         return guesses
 
@@ -88,10 +133,12 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         self.legalLabels.
         """
         logJoint = util.Counter()
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        for label in self.legalLabels:
+            c = 0
+            for feature, p in self.conditionals[label]:
+                if datum[feature] > 0:
+                    c += math.log(p)
+            logJoint[label] = math.log(self.priors[label]) + c
         return logJoint
 
     def findHighOddsFeatures(self, label1, label2):

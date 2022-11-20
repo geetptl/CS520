@@ -71,12 +71,12 @@ def enhancedFeatureExtractorDigit(datum):
     ##
     """
     features = util.Counter()
-    FEATURE_WIDTH = 4
-    FEATURE_HEIGHT = 4
+    FEATURE_WIDTH = 2
+    FEATURE_HEIGHT = 2
     for i, j in [(i, j) for i in range(0, DIGIT_DATUM_WIDTH, FEATURE_WIDTH) for j in
                  range(0, DIGIT_DATUM_HEIGHT, FEATURE_HEIGHT)]:
-        features[(i//4, j//4)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH) for v in range(j, j + FEATURE_HEIGHT)])
-    print(features)
+        features[(i//FEATURE_WIDTH, j//FEATURE_HEIGHT)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
+                                                               for v in range(j, j + FEATURE_HEIGHT)])
     return features
 
 
@@ -84,7 +84,7 @@ def contestFeatureExtractorDigit(datum):
     """
     Specify features to use for the minicontest
     """
-    features = basicFeatureExtractorDigit(datum)
+    features = enhancedFeatureExtractorDigit(datum)
     return features
 
 
@@ -93,7 +93,13 @@ def enhancedFeatureExtractorFace(datum):
     Your feature extraction playground for faces.
     It is your choice to modify this.
     """
-    features = basicFeatureExtractorFace(datum)
+    features = util.Counter()
+    FEATURE_WIDTH = 10
+    FEATURE_HEIGHT = 10
+    for i, j in [(i, j) for i in range(0, FACE_DATUM_WIDTH, FEATURE_WIDTH) for j in
+                 range(0, FACE_DATUM_HEIGHT, FEATURE_HEIGHT)]:
+        features[(i//FEATURE_WIDTH, j//FEATURE_HEIGHT)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
+                                                               for v in range(j, j + FEATURE_HEIGHT)])
     return features
 
 
