@@ -7,16 +7,16 @@
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 import math
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 import classificationMethod
 import util
 
 
-def showDatum(data, filename):
-    viewer = np.zeros(shape=(max([u for u, _ in data.keys()]) + 1, max([u for _, u in data.keys()]) + 1))
-    for feature, value in data.items():
+def showDatum(datum, filename):
+    viewer = np.zeros(shape=(max([u for u, _ in datum.keys()]) + 1, max([u for _, u in datum.keys()]) + 1))
+    for feature, value in datum.items():
         viewer[feature] = value
     viewer = viewer / np.max(viewer)
     viewer = np.pad(np.rot90(np.fliplr(np.kron(viewer, np.ones((20, 20))))), ((1, 1), (1, 1)), 'constant',
@@ -89,26 +89,32 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         for k_ in kgrid:
             print("k :", k_)
             conditionals_ = util.Counter()
+            for label in self.legalLabels:
+                conditionals_[label] = util.Counter()
             for data, label in zip(trainingData, trainingLabels):
                 labelConditional = util.Counter()
                 for feature, value in data.items():
                     labelConditional.incrementAll([feature], value + k_)
+                conditionals_[label] += labelConditional
+            conditionals2 = util.Counter()
+            for label, labelConditional in conditionals_.items():
                 labelConditional.normalize()
-                conditionals_[label] = labelConditional
-            self.conditionals = conditionals_
-            for label, data in conditionals_.items():
+                conditionals2[label] = labelConditional
+            self.conditionals = conditionals2
+            for label, data in conditionals2.items():
                 showDatum(data, "out/training/k_{}_label_{}.png".format(k_, label))
-            guesses = self.classify(validationData)
+            guesses = self.classify(validationData, validationLabels, runtype="validation")
             correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
             accuracy = correct * 100 / len(validationLabels)
             print("Accuracy :", accuracy)
             if accuracy > bestAccuracy:
+                bestAccuracy = accuracy
                 self.k = k_
-                bestConditionals = conditionals_
+                bestConditionals = conditionals2
         self.conditionals = bestConditionals
         print("Best k :", self.k)
 
-    def classify(self, testData):
+    def classify(self, testData, testLabels, runtype="test"):
         """
         Classify the data based on the posterior distribution over labels.
 
@@ -116,9 +122,16 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         """
         guesses = []
         self.posteriors = []  # Log posteriors are stored for later data analysis (autograder).
-        for datum in testData:
+        for i, datum_ in enumerate(zip(testData, testLabels)):
+            datum = datum_[0]
+            correctLabel = datum_[1]
             posterior = self.calculateLogJointProbabilities(datum)
             label = posterior.argMax()
+            if correctLabel == label:
+                showDatum(datum, "out/{}/correct/datum_{}_label_{}.png".format(runtype, i, label))
+            else:
+                showDatum(datum,
+                          "out/{}/incorrect/datum_{}_label_{}_correct_{}.png".format(runtype, i, label, correctLabel))
             guesses.append(label)
             self.posteriors.append(posterior)
         return guesses
@@ -135,7 +148,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         logJoint = util.Counter()
         for label in self.legalLabels:
             c = 0
-            for feature, p in self.conditionals[label]:
+            for feature, p in self.conditionals[label].items():
                 if datum[feature] > 0:
                     c += math.log(p)
             logJoint[label] = math.log(self.priors[label]) + c
