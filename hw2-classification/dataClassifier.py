@@ -94,8 +94,8 @@ def enhancedFeatureExtractorFace(datum):
     It is your choice to modify this.
     """
     features = util.Counter()
-    FEATURE_WIDTH = 10
-    FEATURE_HEIGHT = 10
+    FEATURE_WIDTH = 5
+    FEATURE_HEIGHT = 5
     for i, j in [(i, j) for i in range(0, FACE_DATUM_WIDTH, FEATURE_WIDTH) for j in
                  range(0, FACE_DATUM_HEIGHT, FEATURE_HEIGHT)]:
         features[(i//FEATURE_WIDTH, j//FEATURE_HEIGHT)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)

@@ -103,7 +103,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
             self.conditionals = conditionals2
             for label, data in conditionals2.items():
                 showDatum(data, "out/training/k_{}_label_{}.png".format(k_, label))
-            guesses = self.classify(validationData, validationLabels, runtype="validation")
+            guesses = self.classify(validationData, validationLabels, runtype="validation2")
             correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
             accuracy = correct * 100 / len(validationLabels)
             print("Accuracy :", accuracy)
@@ -127,11 +127,13 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
             correctLabel = datum_[1]
             posterior = self.calculateLogJointProbabilities(datum)
             label = posterior.argMax()
-            if correctLabel == label:
-                showDatum(datum, "out/{}/correct/datum_{}_label_{}.png".format(runtype, i, label))
-            else:
-                showDatum(datum,
-                          "out/{}/incorrect/datum_{}_label_{}_correct_{}.png".format(runtype, i, label, correctLabel))
+            if runtype == "test" or runtype == "validation":
+                if correctLabel == label:
+                    showDatum(datum, "out/{}/correct/datum_{}_label_{}.png".format(runtype, i, label))
+                else:
+                    showDatum(datum,
+                              "out/{}/incorrect/datum_{}_label_{}_correct_{}.png".format(runtype, i, label,
+                                                                                         correctLabel))
             guesses.append(label)
             self.posteriors.append(posterior)
         return guesses
