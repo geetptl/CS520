@@ -13,6 +13,40 @@ import numpy as np
 import classificationMethod
 import util
 
+TEST_SET_SIZE = 100
+DIGIT_DATUM_WIDTH = 28
+DIGIT_DATUM_HEIGHT = 28
+FACE_DATUM_WIDTH = 60
+FACE_DATUM_HEIGHT = 70
+
+
+def extractDigitFeatures(datum):
+    features = util.Counter()
+    FEATURE_WIDTH = 2
+    FEATURE_HEIGHT = 2
+    for i, j in [(i, j) for i in range(0, DIGIT_DATUM_WIDTH, FEATURE_WIDTH) for j in
+                 range(0, DIGIT_DATUM_HEIGHT, FEATURE_HEIGHT)]:
+        features[(i // FEATURE_WIDTH, j // FEATURE_HEIGHT)] = sum(
+            [datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
+             for v in range(j, j + FEATURE_HEIGHT)])
+    return features
+
+
+def extractFaceFeatures(datum):
+    """
+    Your feature extraction playground for faces.
+    It is your choice to modify this.
+    """
+    features = util.Counter()
+    FEATURE_WIDTH = 5
+    FEATURE_HEIGHT = 5
+    for i, j in [(i, j) for i in range(0, FACE_DATUM_WIDTH, FEATURE_WIDTH) for j in
+                 range(0, FACE_DATUM_HEIGHT, FEATURE_HEIGHT)]:
+        features[(i // FEATURE_WIDTH, j // FEATURE_HEIGHT)] = sum(
+            [datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
+             for v in range(j, j + FEATURE_HEIGHT)])
+    return features
+
 
 def showDatum(datum, filename):
     viewer = np.zeros(shape=(max([u for u, _ in datum.keys()]) + 1, max([u for _, u in datum.keys()]) + 1))
@@ -101,9 +135,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
                 labelConditional.normalize()
                 conditionals2[label] = labelConditional
             self.conditionals = conditionals2
-            for label, data in conditionals2.items():
-                showDatum(data, "out/training/k_{}_label_{}.png".format(k_, label))
-            guesses = self.classify(validationData, validationLabels, runtype="validation2")
+            guesses = self.classify(validationData)
             correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
             accuracy = correct * 100 / len(validationLabels)
             print("Accuracy :", accuracy)
@@ -114,7 +146,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         self.conditionals = bestConditionals
         print("Best k :", self.k)
 
-    def classify(self, testData, testLabels, runtype="test"):
+    def classify(self, testData):
         """
         Classify the data based on the posterior distribution over labels.
 
@@ -122,18 +154,10 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         """
         guesses = []
         self.posteriors = []  # Log posteriors are stored for later data analysis (autograder).
-        for i, datum_ in enumerate(zip(testData, testLabels)):
-            datum = datum_[0]
-            correctLabel = datum_[1]
+        for datum in testData:
+            correctLabel = datum[1]
             posterior = self.calculateLogJointProbabilities(datum)
             label = posterior.argMax()
-            if runtype == "test" or runtype == "validation":
-                if correctLabel == label:
-                    showDatum(datum, "out/{}/correct/datum_{}_label_{}.png".format(runtype, i, label))
-                else:
-                    showDatum(datum,
-                              "out/{}/incorrect/datum_{}_label_{}_correct_{}.png".format(runtype, i, label,
-                                                                                         correctLabel))
             guesses.append(label)
             self.posteriors.append(posterior)
         return guesses

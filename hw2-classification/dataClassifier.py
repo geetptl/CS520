@@ -11,8 +11,6 @@
 
 import sys
 
-import mira
-import mostFrequent
 import naiveBayes
 import perceptron
 import samples
@@ -59,47 +57,11 @@ def basicFeatureExtractorFace(datum):
     return features
 
 
-def enhancedFeatureExtractorDigit(datum):
-    """
-    Your feature extraction playground.
-
-    You should return a util.Counter() of features
-    for this datum (datum is of type samples.Datum).
-
-    ## DESCRIBE YOUR ENHANCED FEATURES HERE...
-
-    ##
-    """
-    features = util.Counter()
-    FEATURE_WIDTH = 2
-    FEATURE_HEIGHT = 2
-    for i, j in [(i, j) for i in range(0, DIGIT_DATUM_WIDTH, FEATURE_WIDTH) for j in
-                 range(0, DIGIT_DATUM_HEIGHT, FEATURE_HEIGHT)]:
-        features[(i//FEATURE_WIDTH, j//FEATURE_HEIGHT)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
-                                                               for v in range(j, j + FEATURE_HEIGHT)])
-    return features
-
-
 def contestFeatureExtractorDigit(datum):
     """
     Specify features to use for the minicontest
     """
-    features = enhancedFeatureExtractorDigit(datum)
-    return features
-
-
-def enhancedFeatureExtractorFace(datum):
-    """
-    Your feature extraction playground for faces.
-    It is your choice to modify this.
-    """
-    features = util.Counter()
-    FEATURE_WIDTH = 5
-    FEATURE_HEIGHT = 5
-    for i, j in [(i, j) for i in range(0, FACE_DATUM_WIDTH, FEATURE_WIDTH) for j in
-                 range(0, FACE_DATUM_HEIGHT, FEATURE_HEIGHT)]:
-        features[(i//FEATURE_WIDTH, j//FEATURE_HEIGHT)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
-                                                               for v in range(j, j + FEATURE_HEIGHT)])
+    features = basicFeatureExtractorDigit(datum)
     return features
 
 
@@ -176,22 +138,38 @@ def default(str):
     return str + ' [Default: %default]'
 
 
+def getFeatureFunctionFace(features, classifier):
+    if (features):
+        if classifier == "nb":
+            return naiveBayes.extractFaceFeatures
+        elif classifier == "perceptron":
+            return perceptron.extractFaceFeatures
+    else:
+        return basicFeatureExtractorFace
+
+
+def getFeatureFunctionDigits(features, classifier):
+    if (features):
+        if classifier == "nb":
+            return naiveBayes.extractDigitFeatures
+        elif classifier == "perceptron":
+            return perceptron.extractDigitFeatures
+    else:
+        return basicFeatureExtractorDigit
+
+
 def readCommand(argv):
     "Processes the command used to run from the command line."
     from optparse import OptionParser
     parser = OptionParser(USAGE_STRING)
 
     parser.add_option('-c', '--classifier', help=default('The type of classifier'),
-                      choices=['mostFrequent', 'nb', 'naiveBayes', 'perceptron', 'mira', 'minicontest'],
-                      default='mostFrequent')
+                      choices=['nb', 'perceptron', 'cnn'],
+                      default='nb')
     parser.add_option('-d', '--data', help=default('Dataset to use'), choices=['digits', 'faces'], default='digits')
     parser.add_option('-t', '--training', help=default('The size of the training set'), default=100, type="int")
     parser.add_option('-f', '--features', help=default('Whether to use enhanced features'), default=False,
                       action="store_true")
-    parser.add_option('-o', '--odds', help=default('Whether to compute odds ratios'), default=False,
-                      action="store_true")
-    parser.add_option('-1', '--label1', help=default("First label in an odds ratio comparison"), default=0, type="int")
-    parser.add_option('-2', '--label2', help=default("Second label in an odds ratio comparison"), default=1, type="int")
     parser.add_option('-w', '--weights', help=default('Whether to print weights'), default=False, action="store_true")
     parser.add_option('-k', '--smoothing', help=default("Smoothing parameter (ignored when using --autotune)"),
                       type="float", default=2.0)
@@ -209,25 +187,14 @@ def readCommand(argv):
     print("--------------------")
     print("data:\t\t" + options.data)
     print("classifier:\t\t" + options.classifier)
-    if not options.classifier == 'minicontest':
-        print("using enhanced features?:\t" + str(options.features))
-    else:
-        print("using minicontest feature extractor")
+    print("using enhanced features?:\t" + str(options.features))
     print("training set size:\t" + str(options.training))
-    if (options.data == "digits"):
+    if options.data == "digits":
         printImage = ImagePrinter(DIGIT_DATUM_WIDTH, DIGIT_DATUM_HEIGHT).printImage
-        if (options.features):
-            featureFunction = enhancedFeatureExtractorDigit
-        else:
-            featureFunction = basicFeatureExtractorDigit
-        if (options.classifier == 'minicontest'):
-            featureFunction = contestFeatureExtractorDigit
+        featureFunction = getFeatureFunctionDigits(options.features, options.classifier)
     elif (options.data == "faces"):
         printImage = ImagePrinter(FACE_DATUM_WIDTH, FACE_DATUM_HEIGHT).printImage
-        if (options.features):
-            featureFunction = enhancedFeatureExtractorFace
-        else:
-            featureFunction = basicFeatureExtractorFace
+        featureFunction = getFeatureFunctionFace(options.features, options.classifier)
     else:
         print("Unknown dataset", options.data)
         print(USAGE_STRING)
@@ -248,15 +215,7 @@ def readCommand(argv):
         print(USAGE_STRING)
         sys.exit(2)
 
-    if options.odds:
-        if options.label1 not in legalLabels or options.label2 not in legalLabels:
-            print("Didn't provide a legal labels for the odds ratio: (%d,%d)" % (options.label1, options.label2))
-            print(USAGE_STRING)
-            sys.exit(2)
-
-    if (options.classifier == "mostFrequent"):
-        classifier = mostFrequent.MostFrequentClassifier(legalLabels)
-    elif (options.classifier == "naiveBayes" or options.classifier == "nb"):
+    if (options.classifier == "nb"):
         classifier = naiveBayes.NaiveBayesClassifier(legalLabels)
         classifier.setSmoothing(options.smoothing)
         if (options.autotune):
@@ -266,16 +225,6 @@ def readCommand(argv):
             print("using smoothing parameter k=%f for naivebayes" % options.smoothing)
     elif (options.classifier == "perceptron"):
         classifier = perceptron.PerceptronClassifier(legalLabels, options.iterations)
-    elif (options.classifier == "mira"):
-        classifier = mira.MiraClassifier(legalLabels, options.iterations)
-        if (options.autotune):
-            print("using automatic tuning for MIRA")
-            classifier.automaticTuning = True
-        else:
-            print("using default C=0.001 for MIRA")
-    elif (options.classifier == 'minicontest'):
-        import minicontest
-        classifier = minicontest.contestClassifier(legalLabels)
     else:
         print("Unknown classifier:", options.classifier)
         print(USAGE_STRING)
@@ -343,7 +292,7 @@ def runClassifier(args, options):
     print("Training...")
     classifier.train(trainingData, trainingLabels, validationData, validationLabels)
     print("Validating...")
-    guesses = classifier.classify(validationData, validationLabels, "validation")
+    guesses = classifier.classify(validationData)
     correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
     print(str(correct),
           ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
@@ -352,18 +301,6 @@ def runClassifier(args, options):
     correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
     print(str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels)))
     analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
-
-    # do odds ratio computation if specified at command line
-    if ((options.odds) & (options.classifier == "naiveBayes" or (options.classifier == "nb"))):
-        label1, label2 = options.label1, options.label2
-        features_odds = classifier.findHighOddsFeatures(label1, label2)
-        if (options.classifier == "naiveBayes" or options.classifier == "nb"):
-            string3 = "=== Features with highest odd ratio of label %d over label %d ===" % (label1, label2)
-        else:
-            string3 = "=== Features for which weight(label %d)-weight(label %d) is biggest ===" % (label1, label2)
-
-        print(string3)
-        printImage(features_odds)
 
     if ((options.weights) & (options.classifier == "perceptron")):
         for l in classifier.legalLabels:
