@@ -45,7 +45,7 @@ class ClassificationMethod:
         """
         abstract
 
-    def classify(self, data, labels, runType):
+    def classify(self, data):
         """
         This function returns a list of labels, each drawn from the set of legal labels
         provided to the classifier upon construction.

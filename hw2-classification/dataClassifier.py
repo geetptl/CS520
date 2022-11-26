@@ -297,7 +297,7 @@ def runClassifier(args, options):
     print(str(correct),
           ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
     print("Testing...")
-    guesses = classifier.classify(testData, testLabels)
+    guesses = classifier.classify(testData)
     correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
     print(str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels)))
     analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
@@ -308,9 +308,9 @@ def runClassifier(args, options):
             print(("=== Features with high weight for label %d ===" % l))
             printImage(features_weights)
 
+    return 100.0 * correct / len(testLabels)
+
 
 if __name__ == '__main__':
-    # Read input
     args, options = readCommand(sys.argv[1:])
-    # Run classifier
-    runClassifier(args, options)
+    accuracy = runClassifier(args, options)
