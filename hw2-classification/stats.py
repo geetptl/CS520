@@ -50,11 +50,16 @@ def extractFeatures(rawTrainingData, classifierName, dataset):
             return list(map(naiveBayes.extractFaceFeatures, rawTrainingData))
         else:
             return list(map(naiveBayes.extractDigitFeatures, rawTrainingData))
+    elif classifierName == 'perceptron':
+        if dataset == 'faces':
+            return list(map(perceptron.extractFaceFeatures, rawTrainingData))
+        else:
+            return list(map(perceptron.extractDigitFeatures, rawTrainingData))
 
 
 if __name__ == '__main__':
     datasets = ['digits', 'faces']
-    classifiers = ['nb']
+    classifiers = ['nb', 'perceptron']
     accuracy = {}
     runs = 5
     for dataset, data in zip(datasets, list(map(loadDataSet, datasets))):
@@ -67,7 +72,7 @@ if __name__ == '__main__':
             trainingData = extractFeatures(rawTrainingData, classifierName, dataset)
             validationData = extractFeatures(rawValidationData, classifierName, dataset)
             testData = extractFeatures(rawTestData, classifierName, dataset)
-            for datasize in range(10, 40, 10):
+            for datasize in range(10, 110, 10):
                 print("Training on {}% data".format(datasize))
                 trainingDataHolder = list(zip(trainingData, trainingLabels))
                 runsAccuracy = []
@@ -88,7 +93,8 @@ if __name__ == '__main__':
                     guesses = classifier.classify(testData)
                     correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
                     print(str(correct),
-                          ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels)))
+                          ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (
+                                      100.0 * correct / len(testLabels)))
                     runsAccuracy.append(100.0 * correct / len(testLabels))
                 classifier_[datasize] = runsAccuracy
             dataset_[classifierName] = classifier_
