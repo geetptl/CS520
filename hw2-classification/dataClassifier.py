@@ -16,7 +16,7 @@ import perceptron
 import samples
 import util
 
-TEST_SET_SIZE = 100
+TEST_SET_SIZE = 1000
 DIGIT_DATUM_WIDTH = 28
 DIGIT_DATUM_HEIGHT = 28
 FACE_DATUM_WIDTH = 60
@@ -167,7 +167,7 @@ def readCommand(argv):
                       choices=['nb', 'perceptron', 'cnn'],
                       default='nb')
     parser.add_option('-d', '--data', help=default('Dataset to use'), choices=['digits', 'faces'], default='digits')
-    parser.add_option('-t', '--training', help=default('The size of the training set'), default=100, type="int")
+    parser.add_option('-t', '--training', help=default('The size of the training set'), default=5000, type="int")
     parser.add_option('-f', '--features', help=default('Whether to use enhanced features'), default=False,
                       action="store_true")
     parser.add_option('-w', '--weights', help=default('Whether to print weights'), default=False, action="store_true")
