@@ -74,7 +74,6 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         self.legalLabels = legalLabels
         self.type = "naivebayes"
         self.k = 1  # this is the smoothing parameter, ** use it in your train method **
-        self.automaticTuning = False  # Look at this flag to decide whether to choose k automatically ** use this in your train method **
 
     def setSmoothing(self, k):
         """
@@ -91,12 +90,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         # might be useful in your code later...
         # this is a list of all features in the training set.
         self.features = list(set([f for datum in trainingData for f in list(datum.keys())]))
-
-        if (self.automaticTuning):
-            kgrid = [0.001, 0.01, 0.05, 0.1, 0.5, 1, 5, 10, 20, 50]
-        else:
-            kgrid = [self.k]
-
+        kgrid = [0.001, 0.01, 0.05, 0.1, 0.5, 1, 5, 10, 20, 50]
         self.trainAndTune(trainingData, trainingLabels, validationData, validationLabels, kgrid)
 
     def trainAndTune(self, trainingData, trainingLabels, validationData, validationLabels, kgrid):
@@ -121,7 +115,6 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         bestAccuracy = -math.inf
         bestConditionals = None
         for k_ in kgrid:
-            print("k :", k_)
             conditionals_ = util.Counter()
             for label in self.legalLabels:
                 conditionals_[label] = util.Counter()
@@ -138,13 +131,11 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
             guesses = self.classify(validationData)
             correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
             accuracy = correct * 100 / len(validationLabels)
-            print("Accuracy :", accuracy)
             if accuracy > bestAccuracy:
                 bestAccuracy = accuracy
                 self.k = k_
                 bestConditionals = conditionals2
         self.conditionals = bestConditionals
-        print("Best k :", self.k)
 
     def classify(self, testData):
         """

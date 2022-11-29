@@ -220,7 +220,7 @@ def readCommand(argv):
         classifier.setSmoothing(options.smoothing)
         if (options.autotune):
             print("using automatic tuning for naivebayes")
-            classifier.automaticTuning = True
+            # classifier.automaticTuning = True
         else:
             print("using smoothing parameter k=%f for naivebayes" % options.smoothing)
     elif (options.classifier == "perceptron"):
