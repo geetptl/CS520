@@ -17,6 +17,7 @@ import naiveBayes
 import perceptron
 import samples
 import util
+import cnn
 
 TEST_SET_SIZE = 100
 DIGIT_DATUM_WIDTH = 28
@@ -177,7 +178,7 @@ def readCommand(argv):
                       choices=['mostFrequent', 'nb', 'naiveBayes', 'perceptron', 'mira', 'minicontest','cnn'],
                       default='mostFrequent')
     parser.add_option('-d', '--data', help=default('Dataset to use'), choices=['digits', 'faces'], default='digits')
-    parser.add_option('-t', '--training', help=default('The size of the training set'), default=5000, type="int")
+    parser.add_option('-t', '--training', help=default('The size of the training set'), default=1000, type="int")
     parser.add_option('-f', '--features', help=default('Whether to use enhanced features'), default=False,
                       action="store_true")
     parser.add_option('-o', '--odds', help=default('Whether to compute odds ratios'), default=False,
