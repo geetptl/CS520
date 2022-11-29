@@ -62,12 +62,9 @@ def basicFeatureExtractorFace(datum):
 def enhancedFeatureExtractorDigit(datum):
     """
     Your feature extraction playground.
-
     You should return a util.Counter() of features
     for this datum (datum is of type samples.Datum).
-
     ## DESCRIBE YOUR ENHANCED FEATURES HERE...
-
     ##
     """
     features = util.Counter()
@@ -94,8 +91,8 @@ def enhancedFeatureExtractorFace(datum):
     It is your choice to modify this.
     """
     features = util.Counter()
-    FEATURE_WIDTH = 10
-    FEATURE_HEIGHT = 10
+    FEATURE_WIDTH = 5
+    FEATURE_HEIGHT = 5
     for i, j in [(i, j) for i in range(0, FACE_DATUM_WIDTH, FEATURE_WIDTH) for j in
                  range(0, FACE_DATUM_HEIGHT, FEATURE_HEIGHT)]:
         features[(i//FEATURE_WIDTH, j//FEATURE_HEIGHT)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
@@ -107,11 +104,8 @@ def analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
     """
     This function is called after learning.
     Include any code that you want here to help you analyze your results.
-
     Use the printImage(<list of pixels>) function to visualize features.
-
     An example of use has been given to you.
-
     - classifier is the trained classifier
     - guesses is the list of labels predicted by your classifier on the test set
     - testLabels is the list of true labels
@@ -119,7 +113,6 @@ def analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
     - rawTestData is the list of training datapoints (as samples.Datum)
     - printImage is a method to visualize the features
     (see its use in the odds ratio part in runClassifier method)
-
     This code won't be evaluated. It is for your own optional use
     (and you can modify the signature if you want).
     """
@@ -153,7 +146,6 @@ class ImagePrinter:
         Prints a Datum object that contains all pixels in the
         provided list of pixels.  This will serve as a helper function
         to the analysis function you write.
-
         Pixels should take the form
         [(2,2), (2, 3), ...]
         where each tuple represents a pixel.
@@ -182,10 +174,10 @@ def readCommand(argv):
     parser = OptionParser(USAGE_STRING)
 
     parser.add_option('-c', '--classifier', help=default('The type of classifier'),
-                      choices=['mostFrequent', 'nb', 'naiveBayes', 'perceptron', 'mira', 'minicontest'],
+                      choices=['mostFrequent', 'nb', 'naiveBayes', 'perceptron', 'mira', 'minicontest','cnn'],
                       default='mostFrequent')
     parser.add_option('-d', '--data', help=default('Dataset to use'), choices=['digits', 'faces'], default='digits')
-    parser.add_option('-t', '--training', help=default('The size of the training set'), default=100, type="int")
+    parser.add_option('-t', '--training', help=default('The size of the training set'), default=5000, type="int")
     parser.add_option('-f', '--features', help=default('Whether to use enhanced features'), default=False,
                       action="store_true")
     parser.add_option('-o', '--odds', help=default('Whether to compute odds ratios'), default=False,
@@ -198,7 +190,7 @@ def readCommand(argv):
     parser.add_option('-a', '--autotune', help=default("Whether to automatically tune hyperparameters"), default=False,
                       action="store_true")
     parser.add_option('-i', '--iterations', help=default("Maximum iterations to run training"), default=3, type="int")
-    parser.add_option('-s', '--test', help=default("Amount of test data to use"), default=TEST_SET_SIZE, type="int")
+    parser.add_option('-s', '--test', help=default("Amount of test data to use"), default=1000, type="int")
 
     options, otherjunk = parser.parse_args(argv)
     if len(otherjunk) != 0: raise Exception('Command line input not understood: ' + str(otherjunk))
@@ -266,6 +258,8 @@ def readCommand(argv):
             print("using smoothing parameter k=%f for naivebayes" % options.smoothing)
     elif (options.classifier == "perceptron"):
         classifier = perceptron.PerceptronClassifier(legalLabels, options.iterations)
+    elif (options.classifier == "cnn"):
+        classifier = cnn.ConvolutionalNeuralNetworkClassifier(legalLabels, options.iterations)
     elif (options.classifier == "mira"):
         classifier = mira.MiraClassifier(legalLabels, options.iterations)
         if (options.autotune):
@@ -343,12 +337,12 @@ def runClassifier(args, options):
     print("Training...")
     classifier.train(trainingData, trainingLabels, validationData, validationLabels)
     print("Validating...")
-    guesses = classifier.classify(validationData)
+    guesses = classifier.classify(validationData, validationLabels, "validation")
     correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
     print(str(correct),
           ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
     print("Testing...")
-    guesses = classifier.classify(testData)
+    guesses = classifier.classify(testData, testLabels)
     correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
     print(str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels)))
     analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
