@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 import naiveBayes
 import perceptron
 import samples
@@ -94,9 +96,13 @@ if __name__ == '__main__':
                     correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
                     print(str(correct),
                           ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (
-                                      100.0 * correct / len(testLabels)))
+                                  100.0 * correct / len(testLabels)))
                     runsAccuracy.append(100.0 * correct / len(testLabels))
-                classifier_[datasize] = runsAccuracy
+                stats_ = {"mean": np.mean(runsAccuracy), "median": np.median(runsAccuracy),
+                          "std": np.std(runsAccuracy)}
+                print(stats_)
+                classifier_[datasize] = stats_
             dataset_[classifierName] = classifier_
         accuracy[dataset] = dataset_
+    print("============Final============")
     print(accuracy)
