@@ -61,7 +61,7 @@ if __name__ == '__main__':
     datasets = ['digits', 'faces']
     classifiers = ['nb', 'perceptron']
     accuracy = {}
-    runs = 5
+    runs = 10
     for dataset, data in zip(datasets, list(map(loadDataSet, datasets))):
         dataset_ = {}
         rawTrainingData, trainingLabels, rawValidationData, validationLabels, rawTestData, testLabels = data
