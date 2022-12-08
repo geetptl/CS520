@@ -8,6 +8,7 @@
 
 import numpy as np
 
+import classificationMethod
 import util
 
 DIGIT_DATUM_WIDTH = 28
@@ -44,7 +45,7 @@ def extractFaceFeatures(datum):
     return features
 
 
-class PerceptronClassifier:
+class PerceptronClassifier(classificationMethod.ClassificationMethod):
     """
     Perceptron classifier.
 
