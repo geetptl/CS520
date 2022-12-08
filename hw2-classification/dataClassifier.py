@@ -15,6 +15,7 @@ import naiveBayes
 import perceptron
 import samples
 import util
+import cnn
 
 TEST_SET_SIZE = 1000
 DIGIT_DATUM_WIDTH = 28
@@ -167,7 +168,7 @@ def readCommand(argv):
                       choices=['nb', 'perceptron', 'cnn'],
                       default='nb')
     parser.add_option('-d', '--data', help=default('Dataset to use'), choices=['digits', 'faces'], default='digits')
-    parser.add_option('-t', '--training', help=default('The size of the training set'), default=5000, type="int")
+    parser.add_option('-t', '--training', help=default('The size of the training set'), default=450, type="int")
     parser.add_option('-f', '--features', help=default('Whether to use enhanced features'), default=False,
                       action="store_true")
     parser.add_option('-w', '--weights', help=default('Whether to print weights'), default=False, action="store_true")
@@ -176,7 +177,7 @@ def readCommand(argv):
     parser.add_option('-a', '--autotune', help=default("Whether to automatically tune hyperparameters"), default=False,
                       action="store_true")
     parser.add_option('-i', '--iterations', help=default("Maximum iterations to run training"), default=3, type="int")
-    parser.add_option('-s', '--test', help=default("Amount of test data to use"), default=TEST_SET_SIZE, type="int")
+    parser.add_option('-s', '--test', help=default("Amount of test data to use"), default=100, type="int")
 
     options, otherjunk = parser.parse_args(argv)
     if len(otherjunk) != 0: raise Exception('Command line input not understood: ' + str(otherjunk))
@@ -225,6 +226,8 @@ def readCommand(argv):
             print("using smoothing parameter k=%f for naivebayes" % options.smoothing)
     elif (options.classifier == "perceptron"):
         classifier = perceptron.PerceptronClassifier(legalLabels, options.iterations)
+    elif (options.classifier == "cnn"):
+        classifier = cnn.ConvolutionalNeuralNetworkClassifier(legalLabels, options.iterations)
     else:
         print("Unknown classifier:", options.classifier)
         print(USAGE_STRING)
