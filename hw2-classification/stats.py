@@ -96,7 +96,7 @@ if __name__ == '__main__':
                     print("Training on size", len(trainingData_))
                     start_time = time.process_time_ns()
                     classifier.train(trainingData_, trainingLabels_, validationData, validationLabels)
-                    runtime.append(time.process_time_ns() - start_time)
+                    runtime.append(1e6 * (time.process_time_ns() - start_time))
                     print("Validating...")
                     guesses = classifier.classify(validationData)
                     correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
