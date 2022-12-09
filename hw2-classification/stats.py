@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 
-import cnn
+import mlp
 import naiveBayes
 import perceptron
 import samples
@@ -46,8 +46,8 @@ def loadClassifier(classifier, labels):
         return naiveBayes.NaiveBayesClassifier(labels)
     elif classifier == 'perceptron':
         return perceptron.PerceptronClassifier(labels, 3)
-    elif classifier == 'cnn':
-        return cnn.ConvolutionalNeuralNetworkClassifier(3)
+    elif classifier == 'mlp':
+        return mlp.MultiLayerPerceptronClassifier(3)
 
 
 def extractFeatures(rawTrainingData, classifierName, dataset):
@@ -61,16 +61,16 @@ def extractFeatures(rawTrainingData, classifierName, dataset):
             return list(map(perceptron.extractFaceFeatures, rawTrainingData))
         else:
             return list(map(perceptron.extractDigitFeatures, rawTrainingData))
-    elif classifierName == 'cnn':
+    elif classifierName == 'mlp':
         if dataset == 'faces':
-            return list(map(cnn.extractFaceFeatures, rawTrainingData))
+            return list(map(mlp.extractFaceFeatures, rawTrainingData))
         else:
-            return list(map(cnn.extractDigitFeatures, rawTrainingData))
+            return list(map(mlp.extractDigitFeatures, rawTrainingData))
 
 
 if __name__ == '__main__':
     datasets = ['digits', 'faces']
-    classifiers = ['nb', 'perceptron', 'cnn']
+    classifiers = ['nb', 'perceptron', 'mlp']
     accuracy = {}
     runs = 10
     for dataset, data in zip(datasets, list(map(loadDataSet, datasets))):

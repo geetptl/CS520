@@ -27,7 +27,7 @@ data = {'digits': {
              'average_runtime': 1080.0789787999997},
         80: {'mean': 77.32, 'median': 77.0, 'std': 3.8154423072561325, 'average_runtime': 1230.2530795999999},
         90: {'mean': 77.81, 'median': 77.75, 'std': 1.8774717041809195, 'average_runtime': 1380.6245783},
-        100: {'mean': 78.0, 'median': 79.45, 'std': 3.8691084244306198, 'average_runtime': 1532.7866778}}, 'cnn': {
+        100: {'mean': 78.0, 'median': 79.45, 'std': 3.8691084244306198, 'average_runtime': 1532.7866778}}, 'mlp': {
         10: {'mean': 82.73000000000002, 'median': 82.55, 'std': 1.2434226956268748,
              'average_runtime': 37276.452271500006},
         20: {'mean': 86.0, 'median': 86.4, 'std': 0.912140340079308, 'average_runtime': 63995.22092199999},
@@ -74,7 +74,7 @@ data = {'digits': {
     90: {'mean': 84.33333333333333, 'median': 84.66666666666667, 'std': 2.4267032964268402,
          'average_runtime': 26.172939199999995},
     100: {'mean': 84.0, 'median': 84.33333333333334, 'std': 2.3094010767585056, 'average_runtime': 29.1016526}},
-                                                              'cnn': {10: {'mean': 78.53333333333333,
+                                                              'mlp': {10: {'mean': 78.53333333333333,
                                                                            'median': 79.66666666666667,
                                                                            'std': 4.796294866294653,
                                                                            'average_runtime': 4141.092853200001},
@@ -117,9 +117,9 @@ if __name__ == '__main__':
     digits_perceptron_mean = [d1['mean'] for p, d1 in data['digits']['perceptron'].items()]
     digits_perceptron_std = [d1['std'] for p, d1 in data['digits']['perceptron'].items()]
     digits_perceptron_runtime = [d1['average_runtime'] for p, d1 in data['digits']['perceptron'].items()]
-    digits_mlp_mean = [d1['mean'] for p, d1 in data['digits']['cnn'].items()]
-    digits_mlp_std = [d1['std'] for p, d1 in data['digits']['cnn'].items()]
-    digits_mlp_runtime = [d1['average_runtime'] for p, d1 in data['digits']['cnn'].items()]
+    digits_mlp_mean = [d1['mean'] for p, d1 in data['digits']['mlp'].items()]
+    digits_mlp_std = [d1['std'] for p, d1 in data['digits']['mlp'].items()]
+    digits_mlp_runtime = [d1['average_runtime'] for p, d1 in data['digits']['mlp'].items()]
 
     faces_nb_mean = [d1['mean'] for p, d1 in data['faces']['nb'].items()]
     faces_nb_std = [d1['std'] for p, d1 in data['faces']['nb'].items()]
@@ -127,9 +127,9 @@ if __name__ == '__main__':
     faces_perceptron_mean = [d1['mean'] for p, d1 in data['faces']['perceptron'].items()]
     faces_perceptron_std = [d1['std'] for p, d1 in data['faces']['perceptron'].items()]
     faces_perceptron_runtime = [d1['average_runtime'] for p, d1 in data['faces']['perceptron'].items()]
-    faces_mlp_mean = [d1['mean'] for p, d1 in data['faces']['cnn'].items()]
-    faces_mlp_std = [d1['std'] for p, d1 in data['faces']['cnn'].items()]
-    faces_mlp_runtime = [d1['average_runtime'] for p, d1 in data['faces']['cnn'].items()]
+    faces_mlp_mean = [d1['mean'] for p, d1 in data['faces']['mlp'].items()]
+    faces_mlp_std = [d1['std'] for p, d1 in data['faces']['mlp'].items()]
+    faces_mlp_runtime = [d1['average_runtime'] for p, d1 in data['faces']['mlp'].items()]
 
     plt.clf()
     ax = plt.gca()

@@ -42,7 +42,7 @@ def extractFaceFeatures(datum):
     return features
 
 
-class ConvolutionalNeuralNetworkClassifier(classificationMethod.ClassificationMethod):
+class MultiLayerPerceptronClassifier(classificationMethod.ClassificationMethod):
     def __init__(self, max_iterations):
         self.type = "MLP"
         self.modelMLP = None

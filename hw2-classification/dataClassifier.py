@@ -15,7 +15,7 @@ import naiveBayes
 import perceptron
 import samples
 import util
-import cnn
+import mlp
 
 TEST_SET_SIZE = 1000
 DIGIT_DATUM_WIDTH = 28
@@ -227,7 +227,7 @@ def readCommand(argv):
     elif (options.classifier == "perceptron"):
         classifier = perceptron.PerceptronClassifier(legalLabels, options.iterations)
     elif (options.classifier == "cnn"):
-        classifier = cnn.ConvolutionalNeuralNetworkClassifier(legalLabels, options.iterations)
+        classifier = cnn.MultiLayerPerceptronClassifier(legalLabels, options.iterations)
     else:
         print("Unknown classifier:", options.classifier)
         print(USAGE_STRING)
