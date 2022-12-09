@@ -1,4 +1,5 @@
 import random
+import time
 
 import numpy as np
 
@@ -86,13 +87,16 @@ if __name__ == '__main__':
                 print("Training on {}% data".format(datasize))
                 trainingDataHolder = list(zip(trainingData, trainingLabels))
                 runsAccuracy = []
+                runtime = []
                 for i in range(runs):
                     print("Run", i)
                     random.shuffle(trainingDataHolder)
                     trainingData_ = [i for i, j in trainingDataHolder[:int(datasize * len(trainingData) / 100)]]
                     trainingLabels_ = [j for i, j in trainingDataHolder[:int(datasize * len(trainingData) / 100)]]
                     print("Training on size", len(trainingData_))
+                    start_time = time.process_time_ns()
                     classifier.train(trainingData_, trainingLabels_, validationData, validationLabels)
+                    runtime.append(time.process_time_ns() - start_time)
                     print("Validating...")
                     guesses = classifier.classify(validationData)
                     correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
@@ -107,7 +111,7 @@ if __name__ == '__main__':
                                   100.0 * correct / len(testLabels)))
                     runsAccuracy.append(100.0 * correct / len(testLabels))
                 stats_ = {"mean": np.mean(runsAccuracy), "median": np.median(runsAccuracy),
-                          "std": np.std(runsAccuracy)}
+                          "std": np.std(runsAccuracy), "average_runtime": np.mean(runtime)}
                 print(stats_)
                 classifier_[datasize] = stats_
             dataset_[classifierName] = classifier_
