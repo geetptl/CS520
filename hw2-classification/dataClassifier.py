@@ -94,8 +94,8 @@ def enhancedFeatureExtractorFace(datum):
     It is your choice to modify this.
     """
     features = util.Counter()
-    FEATURE_WIDTH = 10
-    FEATURE_HEIGHT = 10
+    FEATURE_WIDTH = 5
+    FEATURE_HEIGHT = 5
     for i, j in [(i, j) for i in range(0, FACE_DATUM_WIDTH, FEATURE_WIDTH) for j in
                  range(0, FACE_DATUM_HEIGHT, FEATURE_HEIGHT)]:
         features[(i//FEATURE_WIDTH, j//FEATURE_HEIGHT)] = sum([datum.getPixel(u, v) for u in range(i, i + FEATURE_WIDTH)
@@ -343,12 +343,12 @@ def runClassifier(args, options):
     print("Training...")
     classifier.train(trainingData, trainingLabels, validationData, validationLabels)
     print("Validating...")
-    guesses = classifier.classify(validationData)
+    guesses = classifier.classify(validationData, validationLabels, "validation")
     correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
     print(str(correct),
           ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
     print("Testing...")
-    guesses = classifier.classify(testData)
+    guesses = classifier.classify(testData, testLabels)
     correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
     print(str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels)))
     analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
